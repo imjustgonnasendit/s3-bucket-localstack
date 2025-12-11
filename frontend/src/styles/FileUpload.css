@@ -1,0 +1,101 @@
+.file-upload-container {
+  margin-bottom: 2rem;
+}
+
+.drop-zone {
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px dashed #ccc;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+  border-color: #667eea;
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.drop-zone.dragging {
+  border-color: #667eea;
+  background: #f0f4ff;
+  border-style: solid;
+}
+
+.drop-zone.uploading {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.upload-icon {
+  width: 80px;
+  height: 80px;
+  color: #667eea;
+  margin: 0 auto 1rem;
+}
+
+.upload-text {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.upload-text strong {
+  color: #667eea;
+}
+
+.upload-hint {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.upload-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-status p {
+  font-size: 1.1rem;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.upload-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.upload-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.upload-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@media (max-width: 768px) {
+  .drop-zone {
+    padding: 2rem 1rem;
+  }
+
+  .upload-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .upload-text {
+    font-size: 1rem;
+  }
+}
