@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document } from '../types/document';
 import { formatFileSize, formatDate } from '../utils/format';
-import { getDownloadUrl, deleteDocument } from '../services/api';
+import { downloadDocument, deleteDocument } from '../services/api';
 import '../styles/DocumentList.css';
 
 interface DocumentListProps {
@@ -12,8 +12,7 @@ interface DocumentListProps {
 const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
   const handleDownload = async (doc: Document) => {
     try {
-      const url = await getDownloadUrl(doc.id);
-      window.open(url, '_blank');
+      await downloadDocument(doc.id);
     } catch (error) {
       console.error('Download failed:', error);
       alert('Failed to download file');

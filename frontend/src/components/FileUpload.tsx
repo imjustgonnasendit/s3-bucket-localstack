@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { uploadFile } from '../services/api';
-import '../styles/FileUpload.css';
+import React, { useState, useRef } from "react";
+import { requestUploadUrl, uploadToS3, confirmUpload } from "../services/api";
+import "../styles/FileUpload.css";
 
 interface FileUploadProps {
   onUploadSuccess: () => void;
@@ -9,7 +9,7 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -40,7 +40,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     }
   };
 
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       await handleFileUpload(files[0]);
@@ -50,23 +52,38 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   const handleFileUpload = async (file: File) => {
     try {
       setIsUploading(true);
-      setUploadProgress(`Uploading ${file.name}...`);
 
-      await uploadFile(file);
+      // STEP 1: Request presigned URL from backend
+      setUploadProgress(`Preparing upload for ${file.name}...`);
+      const { uploadUrl, fields, documentId } = await requestUploadUrl(
+        file.name,
+        file.size,
+        file.type
+      );
 
-      setUploadProgress('Upload successful!');
+      // STEP 2: Upload directly to S3
+      setUploadProgress(`Uploading ${file.name} to S3...`);
+      await uploadToS3(uploadUrl, fields, file);
+
+      // STEP 3: Confirm upload with backend
+      setUploadProgress("Finalizing upload...");
+      await confirmUpload(documentId);
+
+      setUploadProgress("Upload successful!");
       setTimeout(() => {
-        setUploadProgress('');
+        setUploadProgress("");
         onUploadSuccess();
       }, 2000);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      setUploadProgress('Upload failed. Please try again.');
-      setTimeout(() => setUploadProgress(''), 3000);
+    } catch (error: any) {
+      console.error("Upload failed:", error);
+      const errorMessage =
+        error.response?.data?.error || "Upload failed. Please try again.";
+      setUploadProgress(errorMessage);
+      setTimeout(() => setUploadProgress(""), 3000);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -78,7 +95,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   return (
     <div className="file-upload-container">
       <div
-        className={`drop-zone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
+        className={`drop-zone ${isDragging ? "dragging" : ""} ${isUploading ? "uploading" : ""}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -89,9 +106,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
           ref={fileInputRef}
           type="file"
           onChange={handleFileInputChange}
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
         />
-        
+
         {isUploading ? (
           <div className="upload-status">
             <div className="spinner"></div>
@@ -121,7 +138,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       </div>
 
       {uploadProgress && !isUploading && (
-        <p className={`upload-message ${uploadProgress.includes('failed') ? 'error' : 'success'}`}>
+        <p
+          className={`upload-message ${uploadProgress.includes("failed") ? "error" : "success"}`}
+        >
           {uploadProgress}
         </p>
       )}

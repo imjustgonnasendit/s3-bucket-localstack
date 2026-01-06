@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/MusicPlayer.css';
+import React, { useState, useEffect } from "react";
+import "../styles/MusicPlayer.css";
 
 // Declare YouTube API types
 declare global {
@@ -16,20 +16,20 @@ const MusicPlayer: React.FC = () => {
 
   // Vaporwave playlist - using YouTube video IDs
   // This is "HOME - Resonance" - iconic vaporwave track
-  const videoId = 'FaUyq18r_GI'; // You can change this to any YouTube video ID
+  const videoId = "FaUyq18r_GI"; // You can change this to any YouTube video ID
 
   useEffect(() => {
     // Load YouTube IFrame API
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
     // Initialize player when API is ready
     window.onYouTubeIframeAPIReady = () => {
-      new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
+      new window.YT.Player("youtube-player", {
+        height: "0",
+        width: "0",
         videoId: videoId,
         playerVars: {
           autoplay: 0,
@@ -81,23 +81,25 @@ const MusicPlayer: React.FC = () => {
   return (
     <div className="music-player">
       {/* Hidden YouTube player */}
-      <div id="youtube-player" style={{ display: 'none' }}></div>
-      
+      <div id="youtube-player" style={{ display: "none" }}></div>
+
       <div className="player-content">
         <div className="player-title">
           <span className="neon-text">🌴 VAPORWAVE 🌴</span>
-          <div style={{ 
-            fontSize: '0.6rem', 
-            color: '#ff66ff',
-            marginTop: '0.25rem',
-            textShadow: '0 0 5px rgba(255, 0, 255, 0.5)'
-          }}>
+          <div
+            style={{
+              fontSize: "0.6rem",
+              color: "#ff66ff",
+              marginTop: "0.25rem",
+              textShadow: "0 0 5px rgba(255, 0, 255, 0.5)",
+            }}
+          >
             HOME - Resonance
           </div>
         </div>
 
-        <button 
-          className={`play-btn ${isPlaying ? 'playing' : ''}`}
+        <button
+          className={`play-btn ${isPlaying ? "playing" : ""}`}
           onClick={togglePlay}
         >
           {isPlaying ? (

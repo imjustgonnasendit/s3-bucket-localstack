@@ -1,13 +1,37 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import documentRoutes from "./routes/documentRoutes";
+import authRoutes from "./routes/authRoutes";
 import pool from "./config/database";
+import { apiLimiter } from "./middleware/rateLimiter";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Security headers with helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "http://localhost:4566",
+          "http://localstack:4566",
+        ], // LocalStack
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -37,19 +61,24 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
+// Apply rate limiting to all API routes
+app.use("/api", apiLimiter);
+
 // Routes
 app.get("/", (req, res) => {
-  res.json({ 
-    message: "Drag & Drop File Upload API", 
-    version: "1.0.0",
+  res.json({
+    message: "Drag & Drop File Upload API with CAC Authentication",
+    version: "2.0.0",
     endpoints: {
       health: "/health",
+      auth: "/api/auth",
       upload: "/api/upload",
-      documents: "/api/documents"
-    }
+      documents: "/api/documents",
+    },
   });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api", documentRoutes);
 
 // Health check

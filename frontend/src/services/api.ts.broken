@@ -1,0 +1,144 @@
+import axios from "axios";
+import {
+  Document,
+  D): Promise<PresignedUploadResponse> => {
+  console.log("\n📡 [FRONTEND] Requesting presigned upload URL from backend");
+  console.log("   Filename:", fileName);
+  console.log("   Size:", fileSize, "bytes");
+  console.log("   Type:", mimeType);
+
+  const response = await api.post<PresignedUploadResponse>(
+    `/upload/request`,
+    { fileName, fileSize, mimeType }
+  );sponse,
+  DownloadResponse,
+} from "../types/document";
+import { auth } from "../utils/auth";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
+// Create axios instance with authentication interceptor
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Add auth token to all requests
+api.interceptors.request.use(
+  (config) => {
+    const token = auth.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Handle 401 responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      auth.logout();
+    }
+    return Promise.reject(error);
+  }
+);
+
+export interface PresignedUploadResponse {
+  uploadUrl: string;
+  fileKey: string;
+  documentId: string;
+  fields: Record<string, string>;
+  message: string;
+}
+
+export const requestUploadUrl = async (
+  fileName: string,
+  fileSize: number,
+  mimeType: string
+): Promise<PresignedUploadResponse> => {
+  console.log("\n� [FRONTEND] Requesting presigned upload URL from backend");
+  console.log("   Filename:", fileName);
+  console.log("   Size:", fileSize, "bytes");
+  console.log("   Type:", mimeType);
+
+  const response = await axios.post<PresignedUploadResponse>(
+    `${API_BASE_URL}/upload/request`,
+    { fileName, fileSize, mimeType }
+  );
+
+  console.log("✅ [FRONTEND] Presigned URL received");
+  console.log("   Document ID:", response.data.documentId);
+  console.log("   Upload URL:", response.data.uploadUrl);
+
+  return response.data;
+};
+
+export const uploadToS3 = async (
+  uploadUrl: string,
+  fields: Record<string, string>,
+  file: File
+): Promise<void> => {
+  console.log("\n☁️  [FRONTEND] Uploading file directly to S3...");
+  console.log("   Filename:", file.name);
+  console.log("   Size:", file.size, "bytes");
+
+  const formData = new FormData();
+
+  // Add all required S3 fields first
+  Object.entries(fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+
+  // Add the file last (required by S3)
+  formData.append("file", file);
+
+  const response = await axios.post(uploadUrl, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  console.log("✅ [FRONTEND] File uploaded to S3 successfully");
+  console.log("   Status:", response.status);
+};
+
+export const confirmUpload = async (documentId: string): Promise<Document> => {
+  console.log("\n✔️  [FRONTEND] Confirming upload with backend");
+  console.log("   Document ID:", documentId);
+
+  const response = await axios.post<{ document: Document; message: string }>(
+    `${API_BASE_URL}/upload/confirm/${documentId}`
+  );
+
+  console.log("✅ [FRONTEND] Upload confirmed");
+  return response.data.document;
+};
+
+export const getDocuments = async (): Promise<Document[]> => {
+  console.log("\n📋 [FRONTEND] Fetching documents list from backend...");
+  const response = await axios.get<DocumentsResponse>(
+    `${API_BASE_URL}/documents`
+  );
+  console.log(
+    `✅ [FRONTEND] Received ${response.data.documents.length} documents`
+  );
+  return response.data.documents;
+};
+
+export const getDownloadUrl = async (id: string): Promise<string> => {
+  console.log("\n⬇️  [FRONTEND] Requesting download URL for document:", id);
+  const response = await axios.get<DownloadResponse>(
+    `${API_BASE_URL}/documents/${id}/download`
+  );
+  console.log("✅ [FRONTEND] Download URL received");
+  return response.data.downloadUrl;
+};
+
+export const deleteDocument = async (id: string): Promise<void> => {
+  console.log("\n🗑️  [FRONTEND] Deleting document:", id);
+  await axios.delete(`${API_BASE_URL}/documents/${id}`);
+  console.log("✅ [FRONTEND] Document deleted successfully");
+};

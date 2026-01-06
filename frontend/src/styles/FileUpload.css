@@ -1,12 +1,16 @@
 /* GRADIENT RICH FILE UPLOAD */
 .file-upload-container {
   margin-bottom: 1rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   flex-shrink: 0;
 }
 
 .drop-zone {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 2px dashed rgba(255, 255, 255, 0.5);
@@ -19,14 +23,22 @@
 }
 
 .drop-zone:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
   border-color: rgba(255, 255, 255, 0.7);
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .drop-zone.dragging {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
   border-color: #ffffff;
   border-style: solid;
 }
@@ -80,14 +92,22 @@
 }
 
 .upload-message.success {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.9) 0%, rgba(56, 142, 60, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(76, 175, 80, 0.9) 0%,
+    rgba(56, 142, 60, 0.9) 100%
+  );
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
 
 .upload-message.error {
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(229, 57, 53, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(244, 67, 54, 0.9) 0%,
+    rgba(229, 57, 53, 0.9) 100%
+  );
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
@@ -99,12 +119,12 @@
     padding: 2.5rem 1.5rem;
     border-radius: 20px;
   }
-  
+
   .upload-icon {
     width: 56px;
     height: 56px;
   }
-  
+
   .upload-text {
     font-size: 1.1rem;
   }
@@ -115,16 +135,16 @@
     padding: 2rem 1rem;
     border-radius: 16px;
   }
-  
+
   .upload-icon {
     width: 48px;
     height: 48px;
   }
-  
+
   .upload-text {
     font-size: 1rem;
   }
-  
+
   .upload-hint {
     font-size: 0.9rem;
   }

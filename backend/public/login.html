@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAC Login - Secure Document Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f2537 0%, #1e3c72 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #90caf9;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+
+        .status-icon {
+            font-size: 24px;
+        }
+
+        .status-text {
+            flex: 1;
+        }
+
+        .status-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .status-message {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .cac-info {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .cac-info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .cac-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cac-detail:last-child {
+            border-bottom: none;
+        }
+
+        .cac-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .cac-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 60, 114, 0.4);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo">🎖️</div>
+            <h1>Secure Document Portal</h1>
+            <p>CAC Authentication Required</p>
+        </div>
+
+        <div class="content">
+            <!-- Initial Status -->
+            <div id="initialStatus" class="status info">
+                <div class="status-icon">🔐</div>
+                <div class="status-text">
+                    <div class="status-title">CAC Authentication</div>
+                    <div class="status-message">Please ensure your CAC card is inserted</div>
+                </div>
+            </div>
+
+            <!-- Success Status -->
+            <div id="successStatus" class="status success hidden">
+                <div class="status-icon">✅</div>
+                <div class="status-text">
+                    <div class="status-title">Authentication Successful</div>
+                    <div class="status-message">Redirecting to application...</div>
+                </div>
+            </div>
+
+            <!-- Error Status -->
+            <div id="errorStatus" class="status error hidden">
+                <div class="status-icon">❌</div>
+                <div class="status-text">
+                    <div class="status-title">Authentication Failed</div>
+                    <div class="status-message" id="errorMessage"></div>
+                </div>
+            </div>
+
+            <!-- CAC Certificate Info (shown after detection) -->
+            <div id="cacInfo" class="cac-info hidden">
+                <div class="cac-info-title">🪪 Certificate Detected</div>
+                <div class="cac-detail">
+                    <span class="cac-label">Name:</span>
+                    <span class="cac-value" id="cacName">-</span>
+                </div>
+                <div class="cac-detail">
+                    <span class="cac-label">EDI-PI:</span>
+                    <span class="cac-value" id="cacEdipi">-</span>
+                </div>
+                <div class="cac-detail">
+                    <span class="cac-label">Issuer:</span>
+                    <span class="cac-value" id="cacIssuer">-</span>
+                </div>
+            </div>
+
+            <!-- Login Button -->
+            <button id="loginButton" class="login-button">
+                <span>🎖️</span>
+                <span>Authenticate with CAC</span>
+            </button>
+
+            <!-- Instructions -->
+            <div class="instructions hidden" id="instructions">
+                <strong>⚠️ No Certificate Detected</strong>
+                1. Ensure your CAC card is inserted<br>
+                2. Select your authentication certificate when prompted<br>
+                3. Enter your PIN if required
+            </div>
+        </div>
+
+        <div class="footer">
+            🔒 Secure Connection | DOD PKI Certificate Required
+        </div>
+    </div>
+
+    <script>
+        let certificateDetected = false;
+        let userInfo = null;
+
+        // Check if certificate is already detected (from TLS handshake)
+        async function checkCertificate() {
+            try {
+                // Make a test request to see if certificate was sent
+                const response = await fetch('/api/auth/check-cert', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.certificateDetected) {
+                        certificateDetected = true;
+                        displayCertificateInfo(data.certificate);
+                    } else {
+                        showInstructions();
+                    }
+                } else {
+                    showInstructions();
+                }
+            } catch (error) {
+                console.error('Certificate check failed:', error);
+                showInstructions();
+            }
+        }
+
+        function displayCertificateInfo(cert) {
+            const cacInfo = document.getElementById('cacInfo');
+            const instructions = document.getElementById('instructions');
+            
+            // Parse common name (format: LAST.FIRST.MIDDLE.EDIPI)
+            const cnParts = cert.commonName.split('.');
+            const lastName = cnParts[0] || '';
+            const firstName = cnParts[1] || '';
+            const edipi = cnParts[cnParts.length - 1] || '';
+            
+            document.getElementById('cacName').textContent = 
+                `${firstName} ${lastName}`.trim() || cert.commonName;
+            document.getElementById('cacEdipi').textContent = edipi;
+            document.getElementById('cacIssuer').textContent = cert.issuer;
+            
+            cacInfo.classList.remove('hidden');
+            instructions.classList.add('hidden');
+        }
+
+        function showInstructions() {
+            document.getElementById('instructions').classList.remove('hidden');
+        }
+
+        async function login() {
+            const button = document.getElementById('loginButton');
+            const initialStatus = document.getElementById('initialStatus');
+            const successStatus = document.getElementById('successStatus');
+            const errorStatus = document.getElementById('errorStatus');
+
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner"></div><span>Authenticating...</span>';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Show success
+                    initialStatus.classList.add('hidden');
+                    errorStatus.classList.add('hidden');
+                    successStatus.classList.remove('hidden');
+
+                    // Redirect after short delay
+                    setTimeout(() => {
+                        window.location.href = '/app';
+                    }, 1500);
+                } else {
+                    throw new Error(data.error || 'Authentication failed');
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+                
+                // Show error
+                initialStatus.classList.add('hidden');
+                successStatus.classList.add('hidden');
+                errorStatus.classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = 
+                    error.message || 'Unable to authenticate. Please check your CAC card and try again.';
+
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = '<span>🎖️</span><span>Retry Authentication</span>';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('loginButton').addEventListener('click', login);
+
+        // Check for certificate on page load
+        checkCertificate();
+    </script>
+</body>
+</html>
