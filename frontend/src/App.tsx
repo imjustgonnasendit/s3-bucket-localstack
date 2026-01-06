@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FileUpload from './components/FileUpload';
 import DocumentList from './components/DocumentList';
+import MusicPlayer from './components/MusicPlayer';
 import { getDocuments } from './services/api';
 import { Document } from './types/document';
 import './styles/App.css';
@@ -59,6 +60,8 @@ const App: React.FC = () => {
           Backend: Express + TypeScript | Frontend: React + TypeScript | Storage: LocalStack S3 | Database: PostgreSQL
         </p>
       </footer>
+
+      <MusicPlayer />
     </div>
   );
 };
