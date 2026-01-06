@@ -7,9 +7,11 @@ CREATE TABLE IF NOT EXISTS documents (
     mime_type VARCHAR(100),
     s3_key VARCHAR(500) NOT NULL,
     s3_bucket VARCHAR(100) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create index on uploaded_at for faster queries
-CREATE INDEX idx_documents_uploaded_at ON documents(uploaded_at DESC);
+-- Create indexes for faster queries
+CREATE INDEX IF NOT EXISTS idx_documents_uploaded_at ON documents(uploaded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);

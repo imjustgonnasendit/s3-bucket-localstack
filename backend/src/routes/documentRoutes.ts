@@ -1,19 +1,13 @@
 import express from 'express';
-import multer from 'multer';
 import * as documentController from '../controllers/documentController';
 
 const router = express.Router();
 
-// Configure multer for memory storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max file size
-  },
-});
+// Direct-to-S3 upload flow (no multer needed)
+router.post('/upload/request', documentController.requestUploadUrl);
+router.post('/upload/confirm/:documentId', documentController.confirmUpload);
 
-// Routes
-router.post('/upload', upload.single('file'), documentController.uploadDocument);
+// Document management routes
 router.get('/documents', documentController.getDocuments);
 router.get('/documents/:id', documentController.getDocument);
 router.get('/documents/:id/download', documentController.downloadDocument);

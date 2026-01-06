@@ -6,6 +6,7 @@ export interface Document {
   mime_type: string | null;
   s3_key: string;
   s3_bucket: string;
+  status: 'pending' | 'completed' | 'failed';
   uploaded_at: Date;
   updated_at: Date;
 }
@@ -18,4 +19,5 @@ export interface CreateDocumentInput {
   mime_type: string | null;
   s3_key: string;
   s3_bucket: string;
+  status?: 'pending' | 'completed' | 'failed';
 }

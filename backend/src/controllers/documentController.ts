@@ -3,52 +3,152 @@ import { v4 as uuidv4 } from 'uuid';
 import * as documentService from '../services/documentService';
 import * as s3Service from '../services/s3Service';
 
-export const uploadDocument = async (req: Request, res: Response) => {
+export const requestUploadUrl = async (req: Request, res: Response) => {
   try {
-    console.log('\n🎬 [UPLOAD FLOW] Starting file upload process...');
+    const { fileName, fileSize, mimeType } = req.body;
     
-    if (!req.file) {
-      console.log('❌ [UPLOAD FLOW] No file provided in request');
-      return res.status(400).json({ error: 'No file provided' });
+    console.log('📝 [UPLOAD REQUEST] Client requesting presigned URL');
+    console.log('   Filename:', fileName);
+    console.log('   Size:', fileSize, 'bytes');
+    console.log('   Type:', mimeType);
+    
+    // Validate required fields
+    if (!fileName || !fileSize || !mimeType) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: fileName, fileSize, mimeType' 
+      });
     }
-
-    console.log('📄 [UPLOAD FLOW] File received from frontend:');
-    console.log('   Original filename:', req.file.originalname);
-    console.log('   Size:', req.file.size, 'bytes');
-    console.log('   MIME type:', req.file.mimetype);
-
-    // Upload to S3
-    console.log('\n⬆️  [STEP 1/2] Uploading to LocalStack S3...');
-    const { key, bucket } = await s3Service.uploadToS3(req.file);
-
-    // Save metadata to database
-    console.log('\n⬆️  [STEP 2/2] Saving metadata to PostgreSQL...');
-    const document = await documentService.createDocument({
-      id: uuidv4(),
-      filename: req.file.filename || req.file.originalname,
-      original_filename: req.file.originalname,
-      file_size: req.file.size,
-      mime_type: req.file.mimetype,
-      s3_key: key,
-      s3_bucket: bucket,
+    
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'text/csv',
+    ];
+    
+    if (!allowedTypes.includes(mimeType)) {
+      console.log('❌ [UPLOAD REQUEST] File type not allowed:', mimeType);
+      return res.status(400).json({ 
+        error: `File type ${mimeType} not allowed` 
+      });
+    }
+    
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024;
+    if (fileSize > maxSize) {
+      console.log('❌ [UPLOAD REQUEST] File too large:', fileSize);
+      return res.status(400).json({ 
+        error: 'File size exceeds 50MB limit' 
+      });
+    }
+    
+    // Sanitize filename
+    const sanitizedFileName = fileName
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .substring(0, 255);
+    
+    // Generate unique ID and S3 key
+    const documentId = uuidv4();
+    const fileKey = `uploads/${documentId}-${sanitizedFileName}`;
+    
+    console.log('🔑 [UPLOAD REQUEST] Generated document ID:', documentId);
+    console.log('🔑 [UPLOAD REQUEST] S3 key:', fileKey);
+    
+    // Create pending database record
+    await documentService.createDocument({
+      id: documentId,
+      filename: sanitizedFileName,
+      original_filename: fileName,
+      file_size: fileSize,
+      mime_type: mimeType,
+      s3_key: fileKey,
+      s3_bucket: process.env.S3_BUCKET_NAME || 'dragdrop-documents',
+      status: 'pending',
     });
-
-    console.log('\n🎉 [UPLOAD FLOW] Upload completed successfully!');
-    console.log('   Document ID:', document.id);
-
-    res.status(201).json({
-      message: 'File uploaded successfully',
-      document,
+    
+    console.log('💾 [UPLOAD REQUEST] Metadata saved to database (status: pending)');
+    
+    // Generate presigned POST URL
+    const { uploadUrl, fields } = await s3Service.generatePresignedPost({
+      key: fileKey,
+      contentType: mimeType,
+      fileSizeLimit: fileSize,
     });
+    
+    console.log('✅ [UPLOAD REQUEST] Presigned URL generated');
+    
+    res.json({
+      uploadUrl,
+      fileKey,
+      documentId,
+      fields,
+      message: 'Upload URL generated. Upload file directly to S3.',
+    });
+    
   } catch (error) {
-    console.error('\n❌ [UPLOAD FLOW] Upload error:', error);
-    res.status(500).json({ error: 'Failed to upload file' });
+    console.error('❌ [UPLOAD REQUEST] Error:', error);
+    res.status(500).json({ error: 'Failed to generate upload URL' });
+  }
+};
+
+export const confirmUpload = async (req: Request, res: Response) => {
+  try {
+    const { documentId } = req.params;
+    
+    console.log('✔️  [UPLOAD CONFIRM] Verifying upload for document:', documentId);
+    
+    const document = await documentService.getDocumentById(documentId);
+    
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    if (document.status === 'completed') {
+      console.log('ℹ️  [UPLOAD CONFIRM] Already confirmed');
+      return res.json({ 
+        message: 'Upload already confirmed',
+        document 
+      });
+    }
+    
+    // Verify file exists in S3
+    console.log('🔍 [UPLOAD CONFIRM] Checking S3 for key:', document.s3_key);
+    const exists = await s3Service.verifyFileExists(document.s3_key);
+    
+    if (!exists) {
+      console.log('❌ [UPLOAD CONFIRM] File not found in S3');
+      return res.status(400).json({ 
+        error: 'File not found in S3. Upload may have failed.' 
+      });
+    }
+    
+    // Update status to completed
+    await documentService.updateDocumentStatus(documentId, 'completed');
+    
+    console.log('✅ [UPLOAD CONFIRM] Upload confirmed, status updated to completed');
+    
+    const updatedDocument = await documentService.getDocumentById(documentId);
+    
+    res.json({ 
+      message: 'Upload confirmed successfully',
+      document: updatedDocument 
+    });
+    
+  } catch (error) {
+    console.error('❌ [UPLOAD CONFIRM] Error:', error);
+    res.status(500).json({ error: 'Failed to confirm upload' });
   }
 };
 
 export const getDocuments = async (req: Request, res: Response) => {
   try {
-    const documents = await documentService.getAllDocuments();
+    const documents = await documentService.getCompletedDocuments();
     res.json({ documents });
   } catch (error) {
     console.error('Get documents error:', error);
@@ -79,6 +179,12 @@ export const downloadDocument = async (req: Request, res: Response) => {
 
     if (!document) {
       return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    if (document.status !== 'completed') {
+      return res.status(400).json({ 
+        error: 'Document upload not completed' 
+      });
     }
 
     const downloadUrl = await s3Service.getDownloadUrl(document.s3_key);
