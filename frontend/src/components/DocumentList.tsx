@@ -1,8 +1,8 @@
-import React from 'react';
-import { Document } from '../types/document';
-import { formatFileSize, formatDate } from '../utils/format';
-import { downloadDocument, deleteDocument } from '../services/api';
-import '../styles/DocumentList.css';
+import React from "react";
+import { Document } from "../types/document";
+import { formatFileSize, formatDate } from "../utils/format";
+import { downloadDocument, deleteDocument } from "../services/api";
+import "../styles/DocumentList.css";
 
 interface DocumentListProps {
   documents: Document[];
@@ -14,8 +14,8 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
     try {
       await downloadDocument(doc.id);
     } catch (error) {
-      console.error('Download failed:', error);
-      alert('Failed to download file');
+      console.error("Download failed:", error);
+      alert("Failed to download file");
     }
   };
 
@@ -25,8 +25,8 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
         await deleteDocument(id);
         onDelete();
       } catch (error) {
-        console.error('Delete failed:', error);
-        alert('Failed to delete file');
+        console.error("Delete failed:", error);
+        alert("Failed to delete file");
       }
     }
   };
@@ -58,7 +58,7 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
               <tr key={doc.id}>
                 <td className="filename">{doc.original_filename}</td>
                 <td>{formatFileSize(doc.file_size)}</td>
-                <td>{doc.mime_type || 'Unknown'}</td>
+                <td>{doc.mime_type || "Unknown"}</td>
                 <td>{formatDate(doc.uploaded_at)}</td>
                 <td className="actions">
                   <button
@@ -66,8 +66,19 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
                     onClick={() => handleDownload(doc)}
                     title="Download"
                   >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
                     </svg>
                   </button>
                   <button
@@ -75,8 +86,19 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, onDelete }) => {
                     onClick={() => handleDelete(doc.id, doc.original_filename)}
                     title="Delete"
                   >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </td>

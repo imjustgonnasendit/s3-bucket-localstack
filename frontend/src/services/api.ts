@@ -47,10 +47,11 @@ export const requestUploadUrl = async (
   fileSize: number,
   mimeType: string
 ): Promise<PresignedUploadResponse> => {
-  const response = await api.post<PresignedUploadResponse>(
-    `/upload/request`,
-    { fileName, fileSize, mimeType }
-  );
+  const response = await api.post<PresignedUploadResponse>(`/upload/request`, {
+    fileName,
+    fileSize,
+    mimeType,
+  });
   return response.data;
 };
 

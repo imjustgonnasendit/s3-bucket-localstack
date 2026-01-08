@@ -98,7 +98,7 @@ const frontendPath = path.join(__dirname, "../../frontend/dist");
 if (fs.existsSync(frontendPath)) {
   // Serve static assets from /assets/* (for CSS, JS bundles)
   app.use("/assets", express.static(path.join(frontendPath, "assets")));
-  
+
   // Serve React app at /app
   app.get("/app*", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
@@ -118,22 +118,22 @@ app.get("/", (req, res) => {
 // Certificate check endpoint (for login page)
 app.get("/api/auth/check-cert", (req, res) => {
   const cert = (req.socket as any).getPeerCertificate?.();
-  
+
   if (cert && Object.keys(cert).length > 0 && cert.subject) {
     // Certificate detected
     res.json({
       certificateDetected: true,
       certificate: {
-        commonName: cert.subject.CN || '',
-        issuer: cert.issuer.CN || '',
+        commonName: cert.subject.CN || "",
+        issuer: cert.issuer.CN || "",
         validFrom: cert.valid_from,
-        validTo: cert.valid_to
-      }
+        validTo: cert.valid_to,
+      },
     });
   } else {
     // No certificate
     res.json({
-      certificateDetected: false
+      certificateDetected: false,
     });
   }
 });

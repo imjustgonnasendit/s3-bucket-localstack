@@ -13,12 +13,12 @@ export interface User {
 export const auth = {
   // Get stored token
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem("authToken");
   },
 
   // Get stored user
   getUser(): User | null {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem("user");
     if (!userStr) return null;
     try {
       return JSON.parse(userStr);
@@ -34,26 +34,26 @@ export const auth = {
 
   // Set authentication data
   setAuth(token: string, user: User): void {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("user", JSON.stringify(user));
   },
 
   // Clear authentication data
   clearAuth(): void {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
   },
 
   // Logout and redirect to login
   logout(): void {
     this.clearAuth();
-    window.location.href = '/login.html';
+    window.location.href = "/login.html";
   },
 
   // Check authentication on app load
   checkAuth(): void {
     if (!this.isAuthenticated()) {
-      window.location.href = '/login.html';
+      window.location.href = "/login.html";
     }
   },
 
@@ -64,7 +64,10 @@ export const auth = {
   },
 
   // Fetch with authentication
-  async authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  async authenticatedFetch(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
     const headers = {
       ...options.headers,
       ...this.getAuthHeader(),
@@ -75,7 +78,7 @@ export const auth = {
     // If unauthorized, redirect to login
     if (response.status === 401) {
       this.logout();
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     return response;
